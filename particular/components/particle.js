@@ -1,20 +1,24 @@
 class Particle {
     constructor(position, velocity, mass, color) {
         this.lifetime = 0
-        this.position = position
-        this.velocity = velocity
+        this.position = position.copy()
+        this.velocity = velocity.copy()
         this.mass = mass
         this.color = color
     }
 
+    applyAcceleration(acceleration) {
+        this.velocity.add(acceleration)
+    }
+
     applyForce(force) {
-        let accelX = (this.mass / force.x)
-        if(accelX == Infinity) accelX = 0
+        let ax = (force.copy().x / this.mass)
+        if(ax == Infinity) ax = 0
 
-        let accelY = (this.mass / force.y)
-        if(accelY == Infinity) accelY = 0
+        let ay = (force.copy().y / this.mass)
+        if(ay == Infinity) ay = 0
 
-        this.velocity.add(createVector(accelX, accelY))
+        this.velocity.add(createVector(ax, ay))
     }
 
     update() {
