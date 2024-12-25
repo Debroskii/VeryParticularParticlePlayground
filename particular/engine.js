@@ -1,16 +1,11 @@
 class VeryParticularEngine {
-    static particles = []
+    static sources = []
 
-    static update() {
-        for (const particle of VeryParticularEngine.particles) {
-            particle.applyForce(Config.getGravityVector())
-            particle.update()
-        }
-    }
-
-    static draw() {
-        for (const particle of VeryParticularEngine.particles) {
-            particle.draw()
+    static tick() {
+        for (const source of VeryParticularEngine.sources) {
+            source.spawn()
+            source.update()
+            source.draw()
         }
     }
 }
