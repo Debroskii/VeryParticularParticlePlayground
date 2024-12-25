@@ -8,12 +8,13 @@ class Particle {
     }
 
     applyForce(force) {
-        let acceleration = createVector(
-            force.x / this.mass,
-            force.y / this.mass
-        )
+        let accelX = (this.mass / force.x)
+        if(accelX == Infinity) accelX = 0
 
-        this.velocity.add(acceleration)
+        let accelY = (this.mass / force.y)
+        if(accelY == Infinity) accelY = 0
+
+        this.velocity.add(createVector(accelX, accelY))
     }
 
     update() {
