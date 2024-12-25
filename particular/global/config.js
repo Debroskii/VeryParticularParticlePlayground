@@ -1,7 +1,7 @@
 class Config {
 
     // Gravity strength and direction for the engine
-    static GRAVITY_MAGNITUDE = 9.8
+    static GRAVITY_MAGNITUDE = 0.0
     static GRAVITY_ANGLE = 0
 
     // Returns a vector of gravity to directly apply to each particle
