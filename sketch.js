@@ -8,6 +8,17 @@ function setup() {
 
 function draw() {
   background(0);
+  VeryParticularEngine.update()
+  VeryParticularEngine.draw()
+}
+
+function mouseDragged() {
+  VeryParticularEngine.particles.push(new Particle(
+    createVector(mouseX, mouseY),
+    createVector(0, 0),
+    1,
+    color(255, 255, 255)
+  ))
 }
 
 function out_of_bounds(position) {
