@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+    --ui-font: monospace;
+    --ui-error: rgba(250, 83, 67, 1);
+    --ui-accent: rgb(114, 104, 255);
+    --ui-blur: 5px;
+
+    --panel-background: rgba(0, 0, 0, 0.5);
+    --panel-text-color: rgba(255, 255, 255, 1);
+    --panel-rounding: 5px;
+
+    --element-background: rgba(0, 0, 0, 0.25);
+    --button-border: none;
+    --button-hover-border: 1px solid rgba(255, 255, 255, 255);
+    --button-transition: all 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.PanelButton {
+    background: var(--element-background);
+    border: var(--button-border);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: var(--button-transition);
+}
+
+.PanelButton:hover {
+    border: var(--button-hover-border);
+}
+
+.CloseButton:hover {
+    border: 1px solid var(--ui-error);
+}
+
+.PanelButtonIcon {
+    filter: invert();
+    width: inherit;
+    height: inherit;
+}
+
+.PanelLockedIcon {
+    width: 12px;
+    height: 12px;
+    margin-left: auto;
+    padding-right: 4px;
+    border-top-right-radius: var(--panel-rounding);
+    filter: invert();
+}
+
+#panelIconBar {
+    backdrop-filter: blur(var(--ui-blur));
+    background: var(--panel-background);
+    width: auto;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: row;
+}
+
+#ui {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.Panel {
+    backdrop-filter: blur(var(--ui-blur));
+    background: var(--panel-background);
+    border-radius: var(--panel-rounding);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.PanelTitleBar {
+    display: flex;
+    align-items: center;
+    width: inherit;
+    height: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--panel-rounding) var(--panel-rounding) 0 0;
+    background: var(--element-background);
+}
+
+.PanelTitleBar .CloseButton { 
+    background: none;
+    border-radius: var(--panel-rounding) 0 0 0
+}
+
+.PanelTitle {
+    padding: 0;
+    margin: 0;
+    margin-left: 5px;
+    color: var(--panel-text-color);
+    font-family: var(--ui-font);
+    font-size: 10px;
+}
+
+.nohighlight-text {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+  }
+
+.PanelRegistry {
+    display: flex;
+    flex-direction: column;
+    color: var(--panel-text-color);
+    font-family: var(--ui-font);
+    font-size: 8px;
+    overflow-y: scroll;
+}
+
+.PanelRegistryEntry {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.PanelRegistryEntryLabel {
+    margin-left: 10px;
+}
+
+.PanelRegistryEntryInput {
+    margin-right: 10px;
+    border: none;
+}
+
+.PanelRegistryEntryNumberInput {
+    width: 65px;
+    height: 20px;
+    background: var(--element-background);
+    font-family: var(--ui-font);
+    color: var(--panel-text-color);
+    font-size: 8px;
+    padding-left: 5px;
+}
+
+.PanelRegistryEntryConstant {
+    margin-right: 5px;
+}
+
+.PanelRegistryEntryCheckboxInput {
+   width: 12px;
+   height: 12px;
+}
+
+.PanelRegistryEntryColorInput {
+    width: 40px;
+    height: 20px;
+    inline-size: 40px;
+    block-size: 20px;
+    background: var(--element-background);
+}
