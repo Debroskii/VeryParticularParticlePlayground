@@ -1,26 +1,74 @@
-const CANV_DIMENSIONS = [1495, 820]
+const DIMENSIONS = [1495, 820]
 const FRAME_RATE = 60
 
-let attr
-
 function setup() {
+  document.addEventListener('contextmenu', event => event.preventDefault())
   frameRate(FRAME_RATE)
-  createCanvas(CANV_DIMENSIONS[0], CANV_DIMENSIONS[1]);
-  attr = new EmitterAttributes(10, 1, color(255, 255, 255))
-  attr.force_variation = 1
+  createCanvas(DIMENSIONS[0], DIMENSIONS[1]);
+  Config.init()
+  UI.create()
 }
 
 function draw() {
-  background(0);
-  print(frameRate())
+  background(0)
+  noStroke()
+  UI.update()
   VeryParticularEngine.tick()
 }
 
-function mouseClicked() {
-  VeryParticularEngine.sources.push(
-    new Emitter(
-      createVector(mouseX, mouseY),
-      attr
-    )
-  )
+function mousePressed() {
+  for(let panel of UI.panels) {
+    panel.pressed()
+  }
+  for(const affector of VeryParticularEngine.affectors) {
+    affector.pressed()
+  }
+  for(const source of VeryParticularEngine.sources) {
+    source.pressed()
+  }
+
+  if(keyIsDown(SHIFT)) {
+    if(mouseButton === LEFT) {
+      VeryParticularEngine.sources.push(new Emitter(createVector(mouseX, mouseY)))
+    } else if (mouseButton === RIGHT) {
+      VeryParticularEngine.affectors.push(new Affector(createVector(mouseX, mouseY), 0))
+    }
+  } else if(keyIsDown(32)) {
+    if(mouseButton === LEFT) {
+      VeryParticularEngine.launch_sources.push(new LaunchEmitter(createVector(mouseX, mouseY)))
+    }
+  }
+}
+
+function mouseReleased() {
+  for(let panel of UI.panels) {
+    panel.released()
+  }
+  for(const affector of VeryParticularEngine.affectors) {
+    affector.released()
+  }
+  for(const source of VeryParticularEngine.sources) {
+    source.released()
+  }
+  for(const source of VeryParticularEngine.launch_sources) {
+    source.released()
+  }
+}
+
+function keyPressed() {
+  if(key === "e") {
+    for(const affector of VeryParticularEngine.affectors) {
+      affector.edit()
+    }
+    for(const source of VeryParticularEngine.sources) {
+      source.edit()
+    }
+  } else if(key === "x") {
+    for(const affector of VeryParticularEngine.affectors) {
+      affector.delete()
+    }
+    for(const source of VeryParticularEngine.sources) {
+      source.delete()
+    }
+  }
 }
