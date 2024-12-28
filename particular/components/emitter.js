@@ -1,29 +1,92 @@
 class Emitter {
-    constructor(position, attributes) {
+    constructor(position) {
         this.particles = []
+        this.id = "E" + round(random(0, 10000))
         this.position = position
-        this.attributes = attributes
+
+        this.dragging = false
+        this.offset = createVector(0, 0)
+
+        this.registry = new Registry(this.id)
+        this.registry.addNumber("id", this.id, "ID", false)
+        this.registry.addNumber("pps", 1, "Particles Per Second", true)
+        this.registry.addNumber("force", 0.5, "Force", true)
+        this.registry.addNumber("force_variation", 0.0, "Force Variation", true)
+        this.registry.addColor("color", color(255, 255, 255), "Color", true)
+        this.registry.addNumber("min_mass", 1, "Minimum Mass", true)
+        this.registry.addNumber("max_mass", 3, "Maximum Mass", true)
+        this.registry.addNumber("min_angle", -180, "Minimum Angle", true)
+        this.registry.addNumber("max_angle", 180, "Maximum Angle", true)
+        this.registry.addBoolean("trail", false, "Particle Trail", true)
+
+        GlobalRegistry.addRegistry(this.registry)
+        
+        let angle = random(this.registry.get("min_angle") * PI/180, this.registry.get("max_angle") * PI/180)
+        let mass = random(this.registry.get("min_mass"), this.registry.get("max_mass"))
+        let speed = (
+            (this.registry.get("force") + random(-this.registry.get("force_variation"), this.registry.get("force_variation"))
+        ) / mass)
+        if(speed == Infinity) speed = 1
+
+        let velocity = createVector(speed * sin(angle), speed * cos(angle))
+
+        this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color"), this.registry.get("trail")))
     }
 
     spawn() {
-        for(var i = 0; i < this.attributes.count; i++) {
-            let angle = random(this.attributes.angles[0], this.attributes.angles[1])
-            let mass = random(this.attributes.mass_range[0], this.attributes.mass_range[1])
-            let speed = ((this.attributes.force + random(-this.attributes.force_variation, this.attributes.force_variation)) / mass)
-            if(speed == Infinity) speed = 1
+        if(this.registry.get("pps") < 1) {
+            if(round(frameCount / 60 % (1 / this.registry.get("pps"))) == 0) {
+                let angle = random(this.registry.get("min_angle") * PI/180, this.registry.get("max_angle") * PI/180)
+                let mass = random(this.registry.get("min_mass"), this.registry.get("max_mass"))
+                let speed = (
+                    (this.registry.get("force") + random(-this.registry.get("force_variation"), this.registry.get("force_variation"))
+                ) / mass)
+                if(speed == Infinity) speed = 1
 
-            let velocity = createVector(speed * sin(angle), speed * cos(angle))
+                let velocity = createVector(speed * sin(angle), speed * cos(angle))
 
-            this.particles.push(new Particle(this.position, velocity, mass, this.attributes.color))
+                this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color"), this.registry.get("trail")))
+            }
+        } else {
+            for(var i = 0; i < this.registry.get("pps"); i++) {
+                let angle = random(this.registry.get("min_angle") * PI/180, this.registry.get("max_angle") * PI/180)
+                let mass = random(this.registry.get("min_mass"), this.registry.get("max_mass"))
+                let speed = (
+                    (this.registry.get("force") + random(-this.registry.get("force_variation"), this.registry.get("force_variation"))
+                ) / mass)
+                if(speed == Infinity) speed = 1
+
+                let velocity = createVector(speed * sin(angle), speed * cos(angle))
+
+                this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color"), this.registry.get("trail")))
+            }
         }
     }
 
     update() {
+        if(this.draggable()) {
+            document.getElementById("ui").style.cursor = "pointer"
+            fill(255, 255)
+            textFont("monospace")
+            textSize(10)
+            text("Emitter", mouseX + 13, mouseY - 7.5)
+            fill(255, 155)
+            textSize(8)
+            text("Press E to Edit", mouseX + 13, mouseY + 5)
+            text("Press X to Delete", mouseX + 13, mouseY + 8.5 * 2)
+        }
+
+        if(this.dragging) {
+            this.position.x = mouseX + this.offset.x
+            this.position.y = mouseY + this.offset.y
+            document.getElementById("ui").style.cursor = "move"
+        }
+
         for(const particle of this.particles) {
             particle.applyAcceleration(Config.getGravityVector())
             particle.update()
 
-            if(Util.out_of_bounds(particle.position) || particle.lifetime >= Config.PARTICLE_TIMEOUT) {
+            if(Util.out_of_bounds(particle.position) || particle.lifetime >= Config.registry.get("particle_timeout")) {
                 this.particles.splice(this.particles.indexOf(particle), 1)
             }
         }
@@ -33,5 +96,124 @@ class Emitter {
         for(const particle of this.particles) {
             particle.draw()
         }
+        fill(this.registry.get("color"))
+        stroke(255)
+        strokeWeight(1)
+        if(this.draggable()) {
+            strokeWeight(3)
+        }
+        circle(this.position.x, this.position.y, 10)
+    }
+
+    edit() {
+        if(this.draggable()) {
+            UI.add_panel(
+                new Panel(
+                    createVector(mouseX, mouseY),
+                    200,
+                    300,
+                    "Edit Emitter",
+                    this.registry
+                )
+            )
+        }
+    }
+
+    delete() {
+        if(this.draggable()) {
+            VeryParticularEngine.sources.splice(VeryParticularEngine.sources.indexOf(this), 1)
+        }
+    }
+
+    pressed() {
+        if(this.draggable()) {
+            this.dragging = true
+            this.offset.set(this.position.x - mouseX, this.position.y - mouseY)
+        }
+    }
+
+    released() {
+        this.dragging = false
+    }
+
+    draggable() {
+        return sqrt(((this.position.x - mouseX) ** 2) + ((this.position.y - mouseY) ** 2)) <= 5
+    }
+}
+
+class LaunchEmitter {
+    constructor(position) {
+        this.particles = []
+        this.id = "LE" + round(random(0, 10000))
+        this.position = position
+        this.angle = 0
+        this.mag = 0
+        this.count = 1
+        this.launched = false
+
+        this.dragging = true
+    }
+
+    launch() {
+        if(this.launched) return
+        for(var i = 0; i < this.count; i++) {
+            let angle = this.angle + random(-i, i)
+            let vel = createVector(this.mag * cos(angle), this.mag * sin(angle))
+            this.particles.push(new Particle(this.position, vel, random(1, 3), color(255, 255, 255), Config.registry.get("launch_particle_trail")))
+        }
+        this.launched = true
+    }
+
+    update() {
+        if(this.dragging) {
+            this.angle = atan2(mouseY - this.position.y, mouseX - this.position.x)
+            this.mag = sqrt(((mouseY - this.position.y) ** 2) + ((mouseX - this.position.x) ** 2)) * 0.1
+            document.getElementById("ui").style.cursor = "pointer"
+        } else {
+            for(const particle of this.particles) {
+                particle.applyAcceleration(Config.getGravityVector())
+                particle.update()
+    
+                if(Util.out_of_bounds(particle.position) || particle.lifetime >= Config.registry.get("launch_particle_timeout")) {
+                    this.particles.splice(this.particles.indexOf(particle), 1)
+                }
+            }
+            if(this.particles.length == 0) {
+                VeryParticularEngine.launch_sources.splice(VeryParticularEngine.launch_sources.indexOf(this), 1)
+            }
+        }
+    }
+
+    draw() {
+        if(this.dragging) {
+            fill(255)
+            circle(this.position.x, this.position.y, 5)
+            stroke(255)
+            let vel = createVector(this.mag * cos(this.angle), this.mag * sin(this.angle))
+            line(this.position.x, this.position.y, this.position.x + vel.x * 10, this.position.y + vel.y * 10)
+
+            let left_vert = createVector(this.mag * 8.5 * cos(this.angle - 0.1), this.mag * 8.5 * sin(this.angle - 0.1))
+            let right_vert = createVector(this.mag * 8.5 * cos(this.angle + 0.1), this.mag * 8.5 * sin(this.angle + 0.1))
+
+            beginShape()
+            vertex(this.position.x + vel.x * 10, this.position.y + vel.y * 10)
+            vertex(this.position.x + left_vert.x, this.position.y + left_vert.y)
+            vertex(this.position.x + right_vert.x, this.position.y + right_vert.y)
+            endShape()
+
+        } else {
+            for(const particle of this.particles) {
+                particle.draw()
+            }
+        }
+    }
+
+    pressed() {}
+    spawn() {}
+
+    released() {
+        this.dragging = false
+        this.launch()
+        console.log("he")
     }
 }
