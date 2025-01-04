@@ -4,8 +4,6 @@ class VeryParticularEngine {
     static affectors = []
 
     static tick() {
-        console.log(VeryParticularEngine.launch_sources)
-
         for(const source of VeryParticularEngine.sources) {
             source.spawn()
             source.update()

@@ -6,8 +6,8 @@ class Affector {
         this.offset = createVector(0, 0)
 
         this.registry = new Registry(this.id)
-        this.registry.addNumber("id", this.id, "ID", false)
-        this.registry.addNumber("force", force, "Force", true)
+        this.registry.registerNumber("id", this.id, "ID", false)
+        this.registry.registerNumber("force", force, "Force", true)
 
         GlobalRegistry.addRegistry(this.registry)
     }
@@ -31,50 +31,29 @@ class Affector {
 
     draw() {
         if(this.draggable()) {
-            noStroke()
-            document.getElementById("ui").style.cursor = "pointer"
+            document.getElementById("UIRoot").style.cursor = "pointer"
+
+            stroke(0, 205)
+            strokeWeight(7)
             fill(255, 255)
             textFont("monospace")
             textSize(10)
-            if(this.registry.get("force") < 0) {
-                text("Attractor", mouseX + 13, mouseY - 7.5)
-            } else if (this.registry.get("force") > 0) {
-                text("Repeller", mouseX + 13, mouseY - 7.5)
-            } else {
-                text("Affector", mouseX + 13, mouseY - 7.5)
-            }
-            fill(255, 155)
-            textSize(8)
-            text("Press E to Edit", mouseX + 13, mouseY + 5)
-            text("Press X to Delete", mouseX + 13, mouseY + 8.5 * 2)
+            text(this.registry.get("force") < 0 ? "Attractor" : this.registry.get("force") > 0 ? "Repeller" : "Affector", mouseX + 13, mouseY)
         }
 
         if(this.registry.get("force") < 0) {
-            fill(0)
-            stroke(255)
-            strokeWeight(1)
-            if(this.draggable()) {
-                strokeWeight(3)
-            }
-            circle(this.position.x, this.position.y, 10)
+            stroke(255, 205)
         } else if(this.registry.get("force") > 0) {
-            fill(255)
-            stroke(255)
-            strokeWeight(1)
-            if(this.draggable()) {
-                strokeWeight(3)
-            }
-            circle(this.position.x, this.position.y, 10)
+            stroke(0, 205)
         } else {
-            fill(0)
-            stroke(255, 0, 255)
-            strokeWeight(1)
+            stroke(255, 0, 255, 205)
+        }
+        fill(this.registry.get("force") > 0 ? 255 : 0)
+        strokeWeight(2)
             if(this.draggable()) {
                 strokeWeight(3)
             }
-            circle(this.position.x, this.position.y, 10)
-        }
-        noStroke()
+        circle(this.position.x, this.position.y, 10)
     }
 
     edit() {

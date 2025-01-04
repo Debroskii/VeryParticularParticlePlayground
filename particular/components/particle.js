@@ -1,5 +1,5 @@
 class Particle {
-    constructor(position, velocity, mass, color, trail = false) {
+    constructor(position, velocity, mass, color, trail = false, launched = false) {
         this.lifetime = 0
         this.position = position.copy()
         this.velocity = velocity.copy()
@@ -7,6 +7,7 @@ class Particle {
         this.color = color
         this.trail_points = []
         this.trail = trail
+        this.launched = launched
     }
 
     applyAcceleration(acceleration) {
@@ -33,19 +34,73 @@ class Particle {
         this.position.add(this.velocity)
     }
 
-    draw() {
-        noStroke()
-        fill(this.color)
-        ellipse(this.position.x, this.position.y, this.mass * 1.5, this.mass * 1.5)
-
-        if(!this.trail) return
-        noFill()
-        stroke(this.color)
-        strokeWeight(0.5)
-        beginShape()
-        for(const point of this.trail_points) {
-            vertex(point.x, point.y)
+    draw(draw_info) {
+        let color = this.color
+        let size = this.mass
+        let alpha = 255
+        if(!this.launched) {
+            if(draw_info.gradient.enabled == 'true') {
+                if(draw_info.gradient.basis === Emitter.EffectBasis.DISTANCE) {
+                    let dist = draw_info.emitter_position.dist(this.position)
+                    color = lerpColor(draw_info.gradient.color1, draw_info.gradient.color2, dist / 300)
+                } else if (draw_info.gradient.basis === Emitter.EffectBasis.LIFETIME) {
+                    color = lerpColor(draw_info.gradient.color1, draw_info.gradient.color2, this.lifetime / Config.registry.get("particle_timeout"))
+                }
+            }
+    
+            if(draw_info.fade.enabled == 'true') {
+                if(draw_info.fade.basis === Emitter.EffectBasis.DISTANCE) {
+                    let dist = draw_info.emitter_position.dist(this.position)
+                    alpha = lerp(255, 0, dist / 300)
+                } else if (draw_info.fade.basis === Emitter.EffectBasis.LIFETIME) {
+                    alpha = lerp(255, 0, this.lifetime / Config.registry.get("particle_timeout"))
+                }
+            }
+    
+            if(draw_info.shrink.enabled == 'true') {
+                if(draw_info.shrink.basis === Emitter.EffectBasis.DISTANCE) {
+                    let dist = draw_info.emitter_position.dist(this.position)
+                    size = lerp(this.mass, 0, dist / 300)
+                } else if (draw_info.shrink.basis === Emitter.EffectBasis.LIFETIME) {
+                    size = lerp(this.mass, 0, this.lifetime / Config.registry.get("particle_timeout"))
+                }
+            }
+    
+            if(draw_info.fluctuate == 'true') {
+                size *= random(0.5, 1.5)
+            }
         }
-        endShape()
+
+        noStroke()
+        if(!this.launched) {
+            if(draw_info.twinkle == 'true') {
+                fill(red(color), green(color), blue(color), random(0, 255))
+            } else {
+                fill(red(color), green(color), blue(color), alpha)
+            }
+        } else {
+            fill(red(color), green(color), blue(color), alpha)
+        }
+        
+        circle(this.position.x, this.position.y, size)
+
+        if(this.trail == 'true') {
+            noFill()
+            if(!this.launched) {
+                if(draw_info.twinkle == 'true') {
+                    stroke(red(color), green(color), blue(color), random(0, 255))
+                } else {
+                    stroke(red(color), green(color), blue(color), alpha)
+                }
+            } else {
+                stroke(red(color), green(color), blue(color), alpha)
+            }
+            strokeWeight(size)
+            beginShape()
+            for(const point of this.trail_points) {
+                curveVertex(point.x, point.y)
+            }
+            endShape()
+        }
     }
 }

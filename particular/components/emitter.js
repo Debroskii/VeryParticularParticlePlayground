@@ -1,4 +1,9 @@
 class Emitter {
+    static EffectBasis = Object.freeze({
+        LIFETIME: "Lifetime",
+        DISTANCE: "Distance"
+    })
+
     constructor(position) {
         this.particles = []
         this.id = "E" + round(random(0, 10000))
@@ -9,15 +14,43 @@ class Emitter {
 
         this.registry = new Registry(this.id)
         this.registry.addNumber("id", this.id, "ID", false)
+
+        // Physics
         this.registry.addNumber("pps", 1, "Particles Per Second", true)
         this.registry.addNumber("force", 0.5, "Force", true)
         this.registry.addNumber("force_variation", 0.0, "Force Variation", true)
-        this.registry.addColor("color", color(255, 255, 255), "Color", true)
         this.registry.addNumber("min_mass", 1, "Minimum Mass", true)
         this.registry.addNumber("max_mass", 3, "Maximum Mass", true)
         this.registry.addNumber("min_angle", -180, "Minimum Angle", true)
         this.registry.addNumber("max_angle", 180, "Maximum Angle", true)
+
+        this.registry.addDivider("simple_styling", "Simple Styling")
+
+        this.registry.addColor("color", color(255, 255, 255), "Color", true)
         this.registry.addBoolean("trail", false, "Particle Trail", true)
+        this.registry.addBoolean("twinkle", false, "Twinkle", true)
+
+        this.registry.addDivider("gradient_divider", "Gradient")
+
+        this.registry.addBoolean("gradient_effect", false, "Color Gradient", true)
+        this.registry.addDropdown(
+            "gradient_basis", 
+            Emitter.EffectBasis.LIFETIME, 
+            [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE],
+            "Gradient Basis",
+            true
+        )
+        this.registry.addColor("gradient_color_1", color(255, 255, 255), "1st Gradient Color", true)
+        this.registry.addColor("gradient_color_2", color(255, 255, 255), "2nd Gradient Color", true)
+
+        this.registry.addDivider("fade_divider", "Fading")
+        this.registry.addBoolean("fade_out", false, "Fade Out", true)
+        this.registry.addDropdown("fade_out_basis", Emitter.EffectBasis.LIFETIME, [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE], "Fade Out Basis", true)
+
+        this.registry.addDivider("scaling_divider", "Scaling Effects")
+        this.registry.addBoolean("shrink", false, "Shrink", true)
+        this.registry.addDropdown("shrink_basis", Emitter.EffectBasis.LIFETIME, [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE], "Shrinking Basis", true)
+        this.registry.addBoolean("fluctuate", false, "Fluctuate", true)
 
         GlobalRegistry.addRegistry(this.registry)
         
@@ -64,18 +97,6 @@ class Emitter {
     }
 
     update() {
-        if(this.draggable()) {
-            document.getElementById("ui").style.cursor = "pointer"
-            fill(255, 255)
-            textFont("monospace")
-            textSize(10)
-            text("Emitter", mouseX + 13, mouseY - 7.5)
-            fill(255, 155)
-            textSize(8)
-            text("Press E to Edit", mouseX + 13, mouseY + 5)
-            text("Press X to Delete", mouseX + 13, mouseY + 8.5 * 2)
-        }
-
         if(this.dragging) {
             this.position.x = mouseX + this.offset.x
             this.position.y = mouseY + this.offset.y
@@ -93,16 +114,49 @@ class Emitter {
     }
 
     draw() {
+        console.log(this.registry.get("twinkle"))
         for(const particle of this.particles) {
-            particle.draw()
+            let info = {
+                emitter_position: this.position,
+                gradient: {
+                    enabled: this.registry.get("gradient_effect"),
+                    basis: this.registry.get("gradient_basis"),
+                    color1: this.registry.get('gradient_color_1'),
+                    color2: this.registry.get('gradient_color_2')
+                },
+                twinkle: this.registry.get("twinkle"),
+                fade: {
+                    enabled: this.registry.get("fade_out"),
+                    basis: this.registry.get("fade_out_basis")
+                },
+                shrink: {
+                    enabled: this.registry.get("shrink"),
+                    basis: this.registry.get("shrink_basis")
+                },
+                fluctuate: this.registry.get("fluctuate")
+            }
+            particle.draw(info)
         }
         fill(this.registry.get("color"))
-        stroke(255)
-        strokeWeight(1)
+        stroke(0, 155)
+        strokeWeight(2)
         if(this.draggable()) {
             strokeWeight(3)
         }
         circle(this.position.x, this.position.y, 10)
+
+        if(this.draggable()) {
+            document.getElementById("ui").style.cursor = "pointer"
+            
+            fill(255, 255)
+            textFont("monospace")
+            textSize(10)
+            text("Emitter", mouseX + 13, mouseY - 7.5)
+            fill(255, 155)
+            textSize(8)
+            text("Press E to Edit", mouseX + 13, mouseY + 5)
+            text("Press X to Delete", mouseX + 13, mouseY + 8.5 * 2)
+        }
     }
 
     edit() {
@@ -159,7 +213,7 @@ class LaunchEmitter {
         for(var i = 0; i < this.count; i++) {
             let angle = this.angle + random(-i, i)
             let vel = createVector(this.mag * cos(angle), this.mag * sin(angle))
-            this.particles.push(new Particle(this.position, vel, random(1, 3), color(255, 255, 255), Config.registry.get("launch_particle_trail")))
+            this.particles.push(new Particle(this.position, vel, random(1, 3), color(255, 255, 255), Config.registry.get("launch_particle_trail"), true))
         }
         this.launched = true
     }
