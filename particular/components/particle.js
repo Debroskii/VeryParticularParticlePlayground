@@ -38,56 +38,45 @@ class Particle {
         let color = this.color
         let size = this.mass
         let alpha = 255
-        if(!this.launched) {
-            if(draw_info.gradient.enabled == 'true') {
-                if(draw_info.gradient.basis === Emitter.EffectBasis.DISTANCE) {
-                    let dist = draw_info.emitter_position.dist(this.position)
-                    color = lerpColor(draw_info.gradient.color1, draw_info.gradient.color2, dist / 300)
-                } else if (draw_info.gradient.basis === Emitter.EffectBasis.LIFETIME) {
-                    color = lerpColor(draw_info.gradient.color1, draw_info.gradient.color2, this.lifetime / Config.registry.get("particle_timeout"))
-                }
-            }
-    
-            if(draw_info.fade.enabled == 'true') {
-                if(draw_info.fade.basis === Emitter.EffectBasis.DISTANCE) {
-                    let dist = draw_info.emitter_position.dist(this.position)
-                    alpha = lerp(255, 0, dist / 300)
-                } else if (draw_info.fade.basis === Emitter.EffectBasis.LIFETIME) {
-                    alpha = lerp(255, 0, this.lifetime / Config.registry.get("particle_timeout"))
-                }
-            }
-    
-            if(draw_info.shrink.enabled == 'true') {
-                if(draw_info.shrink.basis === Emitter.EffectBasis.DISTANCE) {
-                    let dist = draw_info.emitter_position.dist(this.position)
-                    size = lerp(this.mass, 0, dist / 300)
-                } else if (draw_info.shrink.basis === Emitter.EffectBasis.LIFETIME) {
-                    size = lerp(this.mass, 0, this.lifetime / Config.registry.get("particle_timeout"))
-                }
-            }
-    
-            if(draw_info.fluctuate == 'true') {
-                size *= random(0.5, 1.5)
+
+        if(draw_info.gradient.enabled) {
+            if(draw_info.gradient.basis === Emitter.EffectBasis.DISTANCE) {
+                let dist = draw_info.emitter_position.dist(this.position)
+                color = lerpColor(draw_info.gradient.color1, draw_info.gradient.color2, dist / 300)
+            } else if (draw_info.gradient.basis === Emitter.EffectBasis.LIFETIME) {
+                color = lerpColor(draw_info.gradient.color1, draw_info.gradient.color2, this.lifetime / Config.registry.get("particle_timeout").value)
             }
         }
+
+        if(draw_info.fade.enabled) {
+            if(draw_info.fade.basis === Emitter.EffectBasis.DISTANCE) {
+                let dist = draw_info.emitter_position.dist(this.position)
+                alpha = lerp(255, 0, dist / 300)
+            } else if (draw_info.fade.basis === Emitter.EffectBasis.LIFETIME) {
+                alpha = lerp(255, 0, this.lifetime / Config.registry.get("particle_timeout").value)
+            }
+        }
+
+        if(draw_info.shrink.enabled) {
+            if(draw_info.shrink.basis === Emitter.EffectBasis.DISTANCE) {
+                let dist = draw_info.emitter_position.dist(this.position)
+                size = lerp(this.mass, 0, dist / 300)
+            } else if (draw_info.shrink.basis === Emitter.EffectBasis.LIFETIME) {
+                size = lerp(this.mass, 0, this.lifetime / Config.registry.get("particle_timeout").value)
+            }
+        }
+
+        if(draw_info.fluctuate) size *= random(0.5, 1.5)
+        if(draw_info.twinkle) alpha *= random(0, 1)
 
         noStroke()
-        if(!this.launched) {
-            if(draw_info.twinkle == 'true') {
-                fill(red(color), green(color), blue(color), random(0, 255))
-            } else {
-                fill(red(color), green(color), blue(color), alpha)
-            }
-        } else {
-            fill(red(color), green(color), blue(color), alpha)
-        }
-        
+        fill(red(color), green(color), blue(color), alpha)
         circle(this.position.x, this.position.y, size)
 
-        if(this.trail == 'true') {
+        if(this.trail) {
             noFill()
             if(!this.launched) {
-                if(draw_info.twinkle == 'true') {
+                if(draw_info.twinkle) {
                     stroke(red(color), green(color), blue(color), random(0, 255))
                 } else {
                     stroke(red(color), green(color), blue(color), alpha)

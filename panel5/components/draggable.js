@@ -7,13 +7,14 @@ class Draggable {
      * @param {*} position the position of the draggable element
      * @param {*} size the size of the draggable element
      */
-    constructor(position, size) {
+    constructor(position, size, snap_to_grid = true) {
         this.position = position
         this.size = size
         
         this.dragging = false
         this.locked = false
         this.offset = createVector(0, 0)
+        this.snap_to_grid = snap_to_grid
     }
 
     /**
@@ -23,10 +24,12 @@ class Draggable {
     update(additional_height = 0) {
         if(this.dragging && !this.locked) {
             if(this.withinX()) {
-                this.position.x -= (this.position.x - ceil((mouseX + this.offset.x) / UI.panel5Config.get("grid_unit_size").value) * UI.panel5Config.get("grid_unit_size").value) * 0.9
+                if(this.snap_to_grid) this.position.x -= (this.position.x - ceil((mouseX + this.offset.x) / 20) * 20) * 0.9
+                else this.position.x = mouseX + this.offset.x
             }
             if(this.withinY(additional_height)) {
-                this.position.y -= (this.position.y - ceil((mouseY + this.offset.y) / UI.panel5Config.get("grid_unit_size").value) * UI.panel5Config.get("grid_unit_size").value) * 0.9
+                if(this.snap_to_grid) this.position.y -= (this.position.y - ceil((mouseY + this.offset.y) / 20) * 20) * 0.9
+                else this.position.y = mouseY + this.offset.y
             }
         }
     }
@@ -69,7 +72,7 @@ class Draggable {
      * @param {*} additional_height the additional height to consider when dragging
      * @returns true if the draggable element is within the y bounds of the window
      */
-    withinY(additional_height) {
+    withinY(additional_height = 0) {
         return (mouseY + this.offset.y < windowHeight - this.size.y - additional_height && mouseY + this.offset.y > 0)
     }
 }

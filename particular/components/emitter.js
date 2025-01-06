@@ -1,10 +1,11 @@
-class Emitter {
+class Emitter extends Draggable {
     static EffectBasis = Object.freeze({
         LIFETIME: "Lifetime",
         DISTANCE: "Distance"
     })
 
     constructor(position) {
+        super(position, createVector(0, 0), false)
         this.particles = []
         this.id = "E" + round(random(0, 10000))
         this.position = position
@@ -13,131 +14,118 @@ class Emitter {
         this.offset = createVector(0, 0)
 
         this.registry = new Registry(this.id)
-        this.registry.addNumber("id", this.id, "ID", false)
 
         // Physics
-        this.registry.addNumber("pps", 1, "Particles Per Second", true)
-        this.registry.addNumber("force", 0.5, "Force", true)
-        this.registry.addNumber("force_variation", 0.0, "Force Variation", true)
-        this.registry.addNumber("min_mass", 1, "Minimum Mass", true)
-        this.registry.addNumber("max_mass", 3, "Maximum Mass", true)
-        this.registry.addNumber("min_angle", -180, "Minimum Angle", true)
-        this.registry.addNumber("max_angle", 180, "Maximum Angle", true)
+        this.registry.registerNumber("pps", 1, "Particles Per Second")
+        this.registry.registerNumber("force", 0.5, "Force")
+        this.registry.registerNumber("force_variation", 0.0, "Force Variation")
+        this.registry.registerNumber("min_mass", 1, "Minimum Mass")
+        this.registry.registerNumber("max_mass", 3, "Maximum Mass")
+        this.registry.registerNumber("min_angle", -180, "Minimum Angle")
+        this.registry.registerNumber("max_angle", 180, "Maximum Angle")
 
-        this.registry.addDivider("simple_styling", "Simple Styling")
+        this.registry.registerColor("color", color(255, 255, 255), "Color", true, "Simple Styling")
+        this.registry.registerBoolean("trail", false, "Particle Trail")
+        this.registry.registerBoolean("twinkle", false, "Twinkle")
 
-        this.registry.addColor("color", color(255, 255, 255), "Color", true)
-        this.registry.addBoolean("trail", false, "Particle Trail", true)
-        this.registry.addBoolean("twinkle", false, "Twinkle", true)
-
-        this.registry.addDivider("gradient_divider", "Gradient")
-
-        this.registry.addBoolean("gradient_effect", false, "Color Gradient", true)
-        this.registry.addDropdown(
+        this.registry.registerBoolean("gradient_effect", false, "Color Gradient", true, "Gradient Styling")
+        this.registry.registerDropdown(
             "gradient_basis", 
             Emitter.EffectBasis.LIFETIME, 
             [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE],
-            "Gradient Basis",
-            true
+            "Gradient Basis"
         )
-        this.registry.addColor("gradient_color_1", color(255, 255, 255), "1st Gradient Color", true)
-        this.registry.addColor("gradient_color_2", color(255, 255, 255), "2nd Gradient Color", true)
+        this.registry.registerColor("gradient_color_1", color(255, 255, 255), "1st Gradient Color")
+        this.registry.registerColor("gradient_color_2", color(255, 255, 255), "2nd Gradient Color")
 
-        this.registry.addDivider("fade_divider", "Fading")
-        this.registry.addBoolean("fade_out", false, "Fade Out", true)
-        this.registry.addDropdown("fade_out_basis", Emitter.EffectBasis.LIFETIME, [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE], "Fade Out Basis", true)
+        this.registry.registerBoolean("fade_out", false, "Fade Out", true, "Fade Styling")
+        this.registry.registerDropdown("fade_out_basis", Emitter.EffectBasis.LIFETIME, [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE], "Fade Out Basis")
 
-        this.registry.addDivider("scaling_divider", "Scaling Effects")
-        this.registry.addBoolean("shrink", false, "Shrink", true)
-        this.registry.addDropdown("shrink_basis", Emitter.EffectBasis.LIFETIME, [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE], "Shrinking Basis", true)
-        this.registry.addBoolean("fluctuate", false, "Fluctuate", true)
+        this.registry.registerBoolean("shrink", false, "Shrink", true, "Size Styling")
+        this.registry.registerDropdown("shrink_basis", Emitter.EffectBasis.LIFETIME, [Emitter.EffectBasis.LIFETIME, Emitter.EffectBasis.DISTANCE], "Shrinking Basis")
+        this.registry.registerBoolean("fluctuate", false, "Fluctuate")
 
         GlobalRegistry.addRegistry(this.registry)
         
-        let angle = random(this.registry.get("min_angle") * PI/180, this.registry.get("max_angle") * PI/180)
-        let mass = random(this.registry.get("min_mass"), this.registry.get("max_mass"))
+        let angle = random(this.registry.get("min_angle").value * PI/180, this.registry.get("max_angle").value * PI/180)
+        let mass = random(this.registry.get("min_mass").value, this.registry.get("max_mass").value)
         let speed = (
-            (this.registry.get("force") + random(-this.registry.get("force_variation"), this.registry.get("force_variation"))
+            (this.registry.get("force").value + random(-this.registry.get("force_variation").value, this.registry.get("force_variation").value)
         ) / mass)
         if(speed == Infinity) speed = 1
 
         let velocity = createVector(speed * sin(angle), speed * cos(angle))
 
-        this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color"), this.registry.get("trail")))
+        this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color").value, this.registry.get("trail").value))
     }
 
     spawn() {
         if(this.registry.get("pps") < 1) {
-            if(round(frameCount / 60 % (1 / this.registry.get("pps"))) == 0) {
-                let angle = random(this.registry.get("min_angle") * PI/180, this.registry.get("max_angle") * PI/180)
-                let mass = random(this.registry.get("min_mass"), this.registry.get("max_mass"))
+            if(round(frameCount / 60 % (1 / this.registry.get("pps").value)) == 0) {
+                let angle = random(this.registry.get("min_angle").value * PI/180, this.registry.get("max_angle").value * PI/180)
+                let mass = random(this.registry.get("min_mass").value, this.registry.get("max_mass").value)
                 let speed = (
-                    (this.registry.get("force") + random(-this.registry.get("force_variation"), this.registry.get("force_variation"))
+                    (this.registry.get("force").value + random(-this.registry.get("force_variation").value, this.registry.get("force_variation").value)
                 ) / mass)
                 if(speed == Infinity) speed = 1
 
                 let velocity = createVector(speed * sin(angle), speed * cos(angle))
 
-                this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color"), this.registry.get("trail")))
+                this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color").value, this.registry.get("trail").value))
             }
         } else {
-            for(var i = 0; i < this.registry.get("pps"); i++) {
-                let angle = random(this.registry.get("min_angle") * PI/180, this.registry.get("max_angle") * PI/180)
-                let mass = random(this.registry.get("min_mass"), this.registry.get("max_mass"))
+            for(var i = 0; i < this.registry.get("pps").value; i++) {
+                let angle = random(this.registry.get("min_angle").value * PI/180, this.registry.get("max_angle").value * PI/180)
+                let mass = random(this.registry.get("min_mass").value, this.registry.get("max_mass").value)
                 let speed = (
-                    (this.registry.get("force") + random(-this.registry.get("force_variation"), this.registry.get("force_variation"))
+                    (this.registry.get("force").value + random(-this.registry.get("force_variation").value, this.registry.get("force_variation").value)
                 ) / mass)
                 if(speed == Infinity) speed = 1
 
                 let velocity = createVector(speed * sin(angle), speed * cos(angle))
 
-                this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color"), this.registry.get("trail")))
+                this.particles.push(new Particle(this.position, velocity, mass, this.registry.get("color").value, this.registry.get("trail").value))
             }
         }
     }
 
     update() {
-        if(this.dragging) {
-            this.position.x = mouseX + this.offset.x
-            this.position.y = mouseY + this.offset.y
-            document.getElementById("ui").style.cursor = "move"
-        }
+        super.update()
 
         for(const particle of this.particles) {
             particle.applyAcceleration(Config.getGravityVector())
             particle.update()
 
-            if(Util.out_of_bounds(particle.position) || particle.lifetime >= Config.registry.get("particle_timeout")) {
+            if(Util.out_of_bounds(particle.position) || particle.lifetime >= Config.registry.get("particle_timeout").value) {
                 this.particles.splice(this.particles.indexOf(particle), 1)
             }
         }
     }
 
     draw() {
-        console.log(this.registry.get("twinkle"))
         for(const particle of this.particles) {
             let info = {
                 emitter_position: this.position,
                 gradient: {
-                    enabled: this.registry.get("gradient_effect"),
-                    basis: this.registry.get("gradient_basis"),
-                    color1: this.registry.get('gradient_color_1'),
-                    color2: this.registry.get('gradient_color_2')
+                    enabled: this.registry.get("gradient_effect").value,
+                    basis: this.registry.get("gradient_basis").value,
+                    color1: this.registry.get('gradient_color_1').value,
+                    color2: this.registry.get('gradient_color_2').value
                 },
-                twinkle: this.registry.get("twinkle"),
+                twinkle: this.registry.get("twinkle").value,
                 fade: {
-                    enabled: this.registry.get("fade_out"),
-                    basis: this.registry.get("fade_out_basis")
+                    enabled: this.registry.get("fade_out").value,
+                    basis: this.registry.get("fade_out_basis").value
                 },
                 shrink: {
-                    enabled: this.registry.get("shrink"),
-                    basis: this.registry.get("shrink_basis")
+                    enabled: this.registry.get("shrink").value,
+                    basis: this.registry.get("shrink_basis").value
                 },
-                fluctuate: this.registry.get("fluctuate")
+                fluctuate: this.registry.get("fluctuate").value
             }
             particle.draw(info)
         }
-        fill(this.registry.get("color"))
+        fill(this.registry.get("color").value)
         stroke(0, 155)
         strokeWeight(2)
         if(this.draggable()) {
@@ -146,52 +134,25 @@ class Emitter {
         circle(this.position.x, this.position.y, 10)
 
         if(this.draggable()) {
-            document.getElementById("ui").style.cursor = "pointer"
+            document.getElementById("UIRoot").style.cursor = "pointer"
             
+            stroke(0, 205)
+            strokeWeight(7)
             fill(255, 255)
             textFont("monospace")
             textSize(10)
-            text("Emitter", mouseX + 13, mouseY - 7.5)
-            fill(255, 155)
-            textSize(8)
-            text("Press E to Edit", mouseX + 13, mouseY + 5)
-            text("Press X to Delete", mouseX + 13, mouseY + 8.5 * 2)
-        }
-    }
-
-    edit() {
-        if(this.draggable()) {
-            UI.add_panel(
-                new Panel(
-                    createVector(mouseX, mouseY),
-                    200,
-                    300,
-                    "Edit Emitter",
-                    this.registry
-                )
-            )
+            text(`Emitter [${this.id}]`, mouseX + 13, mouseY)
         }
     }
 
     delete() {
         if(this.draggable()) {
-            VeryParticularEngine.sources.splice(VeryParticularEngine.sources.indexOf(this), 1)
+            Engine.sources.splice(Engine.sources.indexOf(this), 1)
         }
-    }
-
-    pressed() {
-        if(this.draggable()) {
-            this.dragging = true
-            this.offset.set(this.position.x - mouseX, this.position.y - mouseY)
-        }
-    }
-
-    released() {
-        this.dragging = false
     }
 
     draggable() {
-        return sqrt(((this.position.x - mouseX) ** 2) + ((this.position.y - mouseY) ** 2)) <= 5
+        return this.position.dist(createVector(mouseX, mouseY)) <= 5
     }
 }
 
@@ -233,7 +194,7 @@ class LaunchEmitter {
                 }
             }
             if(this.particles.length == 0) {
-                VeryParticularEngine.launch_sources.splice(VeryParticularEngine.launch_sources.indexOf(this), 1)
+                Engine.launch_sources.splice(Engine.launch_sources.indexOf(this), 1)
             }
         }
     }

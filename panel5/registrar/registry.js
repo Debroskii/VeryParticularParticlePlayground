@@ -9,6 +9,7 @@ class Registry {
     constructor(id) {
         this.id = id
         this.entries = []
+        return this
     }
 
     /**
@@ -28,6 +29,7 @@ class Registry {
             divider_title: divider_title,
             type: EntryType.STRING
         })
+        return this
     }
 
 /**
@@ -47,6 +49,7 @@ class Registry {
             divider_title: divider_title,
             type: EntryType.NUMBER
         })
+        return this
     }
 
     /**
@@ -66,6 +69,7 @@ class Registry {
             divider_title: divider_title,
             type: EntryType.BOOLEAN
         })
+        return this
     }
 
     /**
@@ -85,6 +89,7 @@ class Registry {
             divider_title: divider_title,
             type: EntryType.COLOR
         })
+        return this
     }
 
     /**
@@ -106,6 +111,7 @@ class Registry {
             divider_title: divider_title,
             type: EntryType.DROPDOWN
         })
+        return this
     }
 
     /**

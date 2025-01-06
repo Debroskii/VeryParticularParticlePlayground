@@ -12,11 +12,6 @@ class UI {
      * Initializes the UI system by creating the root DOM element and adding the top bar.
      */
     static initialize() {
-        UI.panel5Config = new Registry("panel5_config")
-        UI.panel5Config.registerBoolean("show_fps", false, "Show FPS")
-        UI.panel5Config.registerNumber("grid_unit_size", 20, "Grid Unit Size")
-        GlobalRegistry.addRegistry(UI.panel5Config)
-
         UI.DOMRoot = createDiv("").id("UIRoot")
         UI.DOMRoot.style("width", windowWidth + "px").style("height", windowHeight + "px")
 
@@ -45,17 +40,21 @@ class UI {
      * @param {*} panel The panel to add
      */
     static addPanel(panel) {
+        if(UI.panels.find(entry => entry.id === panel.id)) {
+            panel.element.remove()
+            return
+        }
         const panelWidth = panel.dimensions.x;
         const panelHeight = panel.dimensions.y;
         const position = this.findOptimalPosition(panel);
         if (position) {
             const { row, col } = position;
-            for (let i = row; i < row + panelHeight / UI.panel5Config.get("grid_unit_size").value; i++) {
-                for (let j = col; j < col + panelWidth / UI.panel5Config.get("grid_unit_size").value; j++) {
+            for (let i = row; i < row + panelHeight / 20; i++) {
+                for (let j = col; j < col + panelWidth / 20; j++) {
                     this.panelNoZone[i][j] = true;
                 }
             }
-            panel.setPosition(col * UI.panel5Config.get("grid_unit_size").value, row * UI.panel5Config.get("grid_unit_size").value);
+            panel.setPosition(col * 20, row * 20);
             this.panels.push(panel);
             UI.DOMRoot.child(panel.element);
         } else {
@@ -71,8 +70,8 @@ class UI {
     static findOptimalPosition(panel) {
         const rows = this.panelNoZone.length;
         const cols = this.panelNoZone[0].length;
-        const panelRows = Math.ceil(panel.dimensions.y / UI.panel5Config.get("grid_unit_size").value);
-        const panelCols = Math.ceil(panel.dimensions.x / UI.panel5Config.get("grid_unit_size").value);
+        const panelRows = Math.ceil(panel.dimensions.y / 20);
+        const panelCols = Math.ceil(panel.dimensions.x / 20);
 
         panel.removeFromNoZone()
 
@@ -157,11 +156,6 @@ class UI {
                 highestIndexPanel.pressed();
                 document.getElementById('UIRoot').appendChild(highestIndexPanel.element.elt || highestIndexPanel.element);
             }
-        } else if (mouseButton === RIGHT) {
-            UI.contextMenu.close()
-            UI.contextMenu.open([
-
-            ])
         }
     }
 
@@ -184,12 +178,12 @@ class UI {
             let position = UI.findOptimalPosition(panel);
             if (position) {
                 const { row, col } = position;
-                for (let i = row; i < row + panel.dimensions.y / UI.panel5Config.get("grid_unit_size").value; i++) {
-                    for (let j = col; j < col + panel.dimensions.x / UI.panel5Config.get("grid_unit_size").value; j++) {
+                for (let i = row; i < row + panel.dimensions.y / 20; i++) {
+                    for (let j = col; j < col + panel.dimensions.x / 20; j++) {
                         UI.panelNoZone[i][j] = true;
                     }
                 }
-                panel.setPosition(col * UI.panel5Config.get("grid_unit_size").value, row * UI.panel5Config.get("grid_unit_size").value);
+                panel.setPosition(col * 20, row * 20);
             }
         }
     }

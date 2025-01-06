@@ -15,15 +15,17 @@ class ContextMenu {
      * Open the context menu at the mouse position.
      * @param {*} actions the actions to display in the context menu
      */
-    open(actions = []) {      
+    open(actions = [], only = false) {      
         this.close()
           
         for(let action of actions) {
             this.element.child(action.elt())
         }
 
-        document.getElementById("ContextMenu").appendChild(new ContextMenuAction("Arrange Panels", UI.autoAlignAllPanels, "Shift + A").elt())
-        document.getElementById("ContextMenu").appendChild(new ContextMenuAction("Clear Panels", () => { UI.removeAllPanels() }, "Shift + C").elt())
+        if(!only) {
+            document.getElementById("ContextMenu").appendChild(new ContextMenuAction("Arrange Panels", UI.autoAlignAllPanels, "Shift + A").elt())
+            document.getElementById("ContextMenu").appendChild(new ContextMenuAction("Clear Panels", () => { UI.removeAllPanels() }, "Shift + C").elt())
+        }
 
         this.element.style("top", mouseY + "px").style("left", mouseX + "px")
         this.element.style("opacity", "100%")

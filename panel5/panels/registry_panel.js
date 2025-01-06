@@ -10,10 +10,10 @@ class RegistryPanel extends Panel {
      * @param {*} dimensions the dimensions of the panel
      * @param {*} title the title of the panel
      */
-    constructor(registry, position, dimensions, title = registry.id) {
-        super(registry.id, position, dimensions, title)
+    constructor(registry, dimensions, title = registry.id) {
+        super(registry.id, createVector(0, 0), dimensions, title)
         
-        this.element.child(createDiv("").addClass("RegistryPanelContent"))
+        this.element.child(createDiv("").addClass("RegistryPanelContent").style("height", (dimensions.y - 20) + "px"))
 
         GlobalRegistry.getRegistry(this.id).entries.forEach(entry => {
             if(entry.add_divider_before) {

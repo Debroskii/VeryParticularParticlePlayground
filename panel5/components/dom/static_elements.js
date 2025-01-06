@@ -73,7 +73,7 @@ function createNumberInput(default_value) {
  * @returns a boolean input element with the specified default value
  */
 function createBooleanInput(default_value) {
-    return createInput(default_value).attribute("type", "checkbox").addClass("BooleanInput").attribute("checked", default_value).attribute("value", default_value)
+    return createInput( default_value).attribute("type", "checkbox").addClass("BooleanInput")
 }
 
 /**

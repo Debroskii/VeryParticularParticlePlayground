@@ -13,7 +13,7 @@ class Panel extends Draggable {
      * @param {*} _show_title whether the panel should display the titlebar
      */
     constructor(id, position, dimensions, title = id, _static = false, _show_title = true) {
-        super(position, createVector(dimensions.x, 20), _static)
+        super(position, createVector(dimensions.x, 20))
         this.id = id,
         this.dimensions = dimensions
         this.locked = _static
@@ -56,9 +56,9 @@ class Panel extends Draggable {
      * @param {*} y the new y position
      */
     setPosition(x, y) {
-        for(let row = 0; row < ceil(this.dimensions.y / UI.panel5Config.get("grid_unit_size").value); row++) {
-            for(let col = 0; col < ceil(this.dimensions.x / UI.panel5Config.get("grid_unit_size").value); col++) {
-                UI.panelNoZone[row + this.position.y / UI.panel5Config.get("grid_unit_size").value][col + this.position.x / UI.panel5Config.get("grid_unit_size").value] = false
+        for(let row = 0; row < ceil(this.dimensions.y / 20); row++) {
+            for(let col = 0; col < ceil(this.dimensions.x / 20); col++) {
+                UI.panelNoZone[row + this.position.y / 20][col + this.position.x / 20] = false
             }
         }
         this.position.set(x, y)
@@ -78,9 +78,9 @@ class Panel extends Draggable {
         if(this._show_title) document.getElementById(this.id).children[0].style.setProperty("cursor", this._static ? "arrow" : "move")
 
         if(this._static) return
-        for(let row = 0; row < ceil(this.dimensions.y / UI.panel5Config.get("grid_unit_size").value); row++) {
-            for(let col = 0; col < ceil(this.dimensions.x / UI.panel5Config.get("grid_unit_size").value); col++) {
-                UI.panelNoZone[row + ceil(this.position.y / UI.panel5Config.get("grid_unit_size").value)][col + ceil(this.position.x / UI.panel5Config.get("grid_unit_size").value)] = true
+        for(let row = 0; row < ceil(this.dimensions.y / 20); row++) {
+            for(let col = 0; col < ceil(this.dimensions.x / 20); col++) {
+                UI.panelNoZone[row + ceil(this.position.y / 20)][col + ceil(this.position.x / 20)] = true
             }
         }
     }
@@ -136,9 +136,9 @@ class Panel extends Draggable {
      */
     removeFromNoZone() {
         if(this._static) return
-        for(let row = 0; row < ceil(this.dimensions.y / UI.panel5Config.get("grid_unit_size").value); row++) {
-            for(let col = 0; col < ceil(this.dimensions.x / UI.panel5Config.get("grid_unit_size").value); col++) {
-                UI.panelNoZone[row + this.position.y / UI.panel5Config.get("grid_unit_size").value][col + this.position.x / UI.panel5Config.get("grid_unit_size").value] = false
+        for(let row = 0; row < ceil(this.dimensions.y / 20); row++) {
+            for(let col = 0; col < ceil(this.dimensions.x / 20); col++) {
+                UI.panelNoZone[row + ceil(this.position.y / 20)][col + ceil(this.position.x / 20)] = false
             }
         }
     }

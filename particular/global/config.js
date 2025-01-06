@@ -25,6 +25,6 @@ class Config {
     }
 
     static getGravitationalForce(m1, m2, distance) {
-        return Config.registry.get("gravitational_constant") * ((m1 * m2) / (distance ** 2))
+        return Config.registry.get("gravitational_constant").value * ((m1 * m2) / ((distance) ** 2))
     }
 }
