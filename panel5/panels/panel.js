@@ -58,7 +58,7 @@ class Panel extends Draggable {
     setPosition(x, y) {
         for(let row = 0; row < ceil(this.dimensions.y / 20); row++) {
             for(let col = 0; col < ceil(this.dimensions.x / 20); col++) {
-                UI.panelNoZone[row + this.position.y / 20][col + this.position.x / 20] = false
+                UI.panelNoZone[row + ceil(this.position.y / 20)][col + ceil(this.position.x / 20)] = false
             }
         }
         this.position.set(x, y)
