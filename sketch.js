@@ -36,26 +36,14 @@ function drawGrid() {
   let rows = ceil(windowHeight / 40)
   let cols = ceil(windowWidth / 40)
 
-  for(var col = 0; col < cols; col++) {
-    let col_x = col * (windowWidth / cols)
-    stroke(255, 7)
-    if(col % 2 == 0) {
-      stroke(255, 12.5)
-    } else if(col % 4 == 0) {
-      stroke(255, 20)
-    }    strokeWeight(2)
-    line(col_x, 0, col_x, windowHeight)
-  }
-
   for(var row = 0; row < rows; row++) {
     let row_y = row * (windowHeight / rows)
-    stroke(255, 7)
-    if(row % 2 == 0) {
-      stroke(255, 12.5)
-    } else if(row % 4 == 0) {
-      stroke(255, 20)
+    for(var col = 0; col < cols; col++) {
+      let col_x = col * (windowWidth / cols)
+      fill(255, 25)
+      noStroke()
+      let size = max(2, min(3, 150/createVector(col_x, row_y).dist(createVector(mouseX, mouseY))))
+      ellipse(col_x, row_y, size, size)
     }
-    strokeWeight(2)
-    line(0, row_y, windowWidth, row_y)
   }
 }
