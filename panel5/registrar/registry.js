@@ -138,7 +138,7 @@ class Registry {
                         entry.value = parseFloat(element.value)
                         break
                     case EntryType.BOOLEAN:
-                        entry.value = element.checked
+                        entry.value = select(`#${this.id}-${entry.key}`).checked()
                         break
                     case EntryType.COLOR:
                         entry.value = color(element.value)
