@@ -44,4 +44,11 @@ class ContextMenu {
         this.element.style("opacity", "0%")
         this.is_open = false
     }
+
+    getPosition() {
+        return createVector(
+            parseFloat(this.element.style("left").replace("px", "")),
+            parseFloat(this.element.style("top").replace("px", ""))
+        )
+    }
 }
