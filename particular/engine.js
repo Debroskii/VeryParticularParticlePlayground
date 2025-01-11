@@ -49,12 +49,12 @@ class Engine {
             if(Engine.notOverClickable()) UI.contextMenu.open([
                 new ContextMenuAction(
                     "Create Emitter",
-                    () => { Engine.addEmitter(new Emitter(createVector(mouseX, mouseY))) },
+                    () => { Engine.addEmitter(new Emitter(UI.contextMenu.getPosition())); console.log(UI.contextMenu.getPosition()) },
                     "CTRL + E"
                 ),
                 new ContextMenuAction(
                     "Create Affector",
-                    () => { Engine.addAffector(new Affector(createVector(mouseX, mouseY))) },
+                    () => { Engine.addAffector(new Affector(UI.contextMenu.getPosition())); console.log(this.affectors) },
                     "CTRL + A"
                 )
             ])
