@@ -17,7 +17,14 @@ class UI {
 
         UI.contextMenu = new ContextMenu()
 
+        let infoPanel = new Panel(
+            "Overview", createVector(20, 40), createVector(1470, 850), "Overview", true
+        )
+
+        infoPanel.element.child(Util.getInfoElement())
+
         this.panels.push(new StaticTopBar())
+        this.panels.push(infoPanel)
 
         for(const panel of UI.panels) {
             UI.DOMRoot.child(panel.element)
@@ -195,5 +202,12 @@ class UI {
         for(let panel = 1; panel < UI.panels.length; panel++) {
             UI.panels[panel].close()
         }
+    }
+
+    static mouseInPanel() {
+        for(let panel of this.panels) {
+            if(panel.mouseWithin()) return true
+        }
+        return false
     }
 }

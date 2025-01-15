@@ -46,7 +46,7 @@ class Engine {
             }
         } else if(mouseButton === RIGHT) {
             UI.contextMenu.close()
-            if(Engine.notOverClickable()) UI.contextMenu.open([
+            if(Engine.notOverClickable() && !UI.mouseInPanel()) UI.contextMenu.open([
                 new ContextMenuAction(
                     "Create Emitter",
                     () => { Engine.addEmitter(new Emitter(UI.contextMenu.getPosition())); console.log(UI.contextMenu.getPosition()) },

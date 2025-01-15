@@ -160,4 +160,8 @@ class Panel extends Draggable {
             return (mouseX < this.position.x + 20 || mouseX > this.position.x + this.size.x - 20)
         }
     }
+
+    mouseWithin() {
+        return mouseX > this.position.x && mouseX < this.position.x + this.dimensions.x && mouseY > this.position.y && mouseY < this.position.y + this.dimensions.y
+    }
 }
